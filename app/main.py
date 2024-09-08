@@ -20,7 +20,7 @@ def main():
         client_socket.sendall(response.encode("utf-8"))
     elif regex:
         response = (
-            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n"
+            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {regex.group(1)}\r\n\r\n"
             + regex.group(1)
         )
 
