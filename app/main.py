@@ -1,4 +1,5 @@
 import socket  # noqa: F401
+import re
 
 
 def main():
@@ -14,9 +15,15 @@ def main():
     method, path, protocol = request_line[0].split(
         " "
     )  # split the first line into method, path and protocol
-
+    regex = re.match(r"/echo/(.*+)", path)
     if path == "/":
         response = "HTTP/1.1 200 OK\r\n\r\n"
+        client_socket.sendall(response.encode("utf-8"))
+    elif regex:
+        response = (
+            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(path)}"
+            + regex.group(1)
+        )
         client_socket.sendall(response.encode("utf-8"))
     else:
         response = "HTTP/1.1 404 Not Found\r\n\r\n"
