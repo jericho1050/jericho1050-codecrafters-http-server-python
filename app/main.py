@@ -21,9 +21,10 @@ def main():
         client_socket.sendall(response.encode("utf-8"))
     elif regex:
         response = (
-            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(path)}"
+            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(path)}\r\n\r\n"
             + regex.group(1)
         )
+
         client_socket.sendall(response.encode("utf-8"))
     else:
         response = "HTTP/1.1 404 Not Found\r\n\r\n"
