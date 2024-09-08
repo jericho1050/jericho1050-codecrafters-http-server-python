@@ -12,15 +12,17 @@ def main():
     client_socket, client_address = server_socket.accept()  # wait for client
     request = client_socket.recv(1024).decode("utf-8")
     headers, body = request.split("\r\n\r\n", 1)
-    first_line = headers.split("\r\n") # which is the first line of the request
-    method, path, protocol = first_line[0].split(" ")# split the first line into method, path and protocol
+    first_line = headers.split("\r\n")  # which is the first line of the request
+    method, path, protocol = first_line[0].split(
+        " "
+    )  # split the first line into method, path and protocol
     regex = re.match(r"/echo/(.*+)", path)
     if path == "/":
         response = "HTTP/1.1 200 OK\r\n\r\n"
         client_socket.sendall(response.encode("utf-8"))
     elif regex:
         response = (
-            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {regex.group(1)}\r\n\r\n"
+            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(regex.group(1))}\r\n\r\n"
             + regex.group(1)
         )
 
