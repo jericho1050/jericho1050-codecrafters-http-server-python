@@ -12,7 +12,6 @@ def main():
     client_socket, client_address = server_socket.accept()  # wait for client
     request = client_socket.recv(1024).decode("utf-8")
     header, body = request.split("\r\n\r\n", 1)
-    print(header)
     first_line, *headers = header.split(
         "\r\n"
     )  # which is the first line of the request in the headers (request line)
