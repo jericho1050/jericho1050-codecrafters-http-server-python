@@ -23,7 +23,7 @@ def main():
     user_agent = None
     for header_line in headers:
         if header_line.startswith("User-Agent:"):
-            user_agent = headers.split(": ")[1]
+            user_agent = header_line.split(": ")[1]
             break
 
     is_echo_route = re.match(r"/echo/(.*+)", path)
