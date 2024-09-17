@@ -12,7 +12,7 @@ def main():
     client_socket, client_address = server_socket.accept()  # wait for client
     request = client_socket.recv(1024).decode("utf-8")
     headers, body = request.split("\r\n\r\n", 1)
-    first_line, host, user_agent, accept = headers.split(
+    first_line, host, accept, user_agent = headers.split(
         "\r\n"
     )  # which is the first line of the request in the headers
 
@@ -36,6 +36,7 @@ def main():
     elif is_user_agent_route:
 
         response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}\r\n"
+
         client_socket.sendall(response.encode("utf-8"))
 
     else:
