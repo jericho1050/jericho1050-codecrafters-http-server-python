@@ -55,7 +55,7 @@ def handle_client(client_socket):
         elif is_file_route:
             file_path = is_file_route.group(1)
             try:
-                with open(file_path, "rb") as file:
+                with open(os.path.join("/", file_path), "rb") as file:
 
                     content = file.read()  # read the content of the file
                     headers = f"HTTP/1.1 200 OK\r\nContent-Type:application/octet-stream\r\nContent-Length: {len(content)}\r\n\r\n"
