@@ -57,16 +57,22 @@ def handle_client(client_socket):
             file_name = is_file_route.group(1)
             directory_name = sys.argv[2]
 
-            try:
-                with open(os.path.join(directory_name, file_name), "rb") as file:
+            if method == "POST":
+                with open(os.path.join(directory_name, file_name), "wb") as file:
+                    file.write(body.encode("utf-8"))
+                response = "HTTP/1.1 201 Created\r\n\r\n"
+                client_socket.sendall(response.encode("utf-8"))
+            else:
+                try:
+                    with open(os.path.join(directory_name, file_name), "rb") as file:
 
-                    content = file.read()  # read the content of the file
-                    headers = f"HTTP/1.1 200 OK\r\nContent-Type:application/octet-stream\r\nContent-Length: {len(content)}\r\n\r\n"
-                    response = headers.encode("utf-8") + content + b"\r\n"
-            except (FileNotFoundError, IsADirectoryError):
-                response = b"HTTP/1.1 404 Not Found\r\n\r\n"
+                        content = file.read()  # read the content of the file
+                        headers = f"HTTP/1.1 200 OK\r\nContent-Type:application/octet-stream\r\nContent-Length: {len(content)}\r\n\r\n"
+                        response = headers.encode("utf-8") + content + b"\r\n"
+                except (FileNotFoundError, IsADirectoryError):
+                    response = b"HTTP/1.1 404 Not Found\r\n\r\n"
 
-            client_socket.sendall(response)
+                client_socket.sendall(response)
 
         else:
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
