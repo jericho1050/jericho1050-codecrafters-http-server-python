@@ -11,8 +11,8 @@ def main():
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     while True:
-        threading.Thread(target=handle_client, args=(client_socket,)).start()
         client_socket, client_address = server_socket.accept()
+        threading.Thread(target=handle_client, args=(client_socket,)).start()
 
 
 def handle_client(client_socket):
