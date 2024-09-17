@@ -36,7 +36,7 @@ def handle_client(client_socket):
 
         is_echo_route = re.match(r"/echo/(.*)", path)
         is_user_agent_route = re.match(r"/user-agent", path)
-        is_file_route = re.match(r"/files/(.*)", path)
+        is_file_route = re.match(r"/(.*)/(.*)", path)
         if path == "/":
             response = "HTTP/1.1 200 OK\r\n\r\n"
             client_socket.sendall(response.encode("utf-8"))
