@@ -2,6 +2,7 @@ import socket  # noqa: F401
 import re
 import threading
 import os
+import sys
 
 
 def main():
@@ -36,7 +37,7 @@ def handle_client(client_socket):
 
         is_echo_route = re.match(r"/echo/(.*)", path)
         is_user_agent_route = re.match(r"/user-agent", path)
-        is_file_route = re.match(r"/(.*)", path)
+        is_file_route = re.match(r"/files/(.*)", path)
         if path == "/":
             response = "HTTP/1.1 200 OK\r\n\r\n"
             client_socket.sendall(response.encode("utf-8"))
@@ -53,9 +54,11 @@ def handle_client(client_socket):
 
             client_socket.sendall(response.encode("utf-8"))
         elif is_file_route:
-            file_path = is_file_route.group(1)
+            file_name = is_file_route.group(1)
+            directory_name = sys.argv[2]
+
             try:
-                with open(os.path.join("/", file_path), "rb") as file:
+                with open(os.path.join(directory_name, file_name), "rb") as file:
 
                     content = file.read()  # read the content of the file
                     headers = f"HTTP/1.1 200 OK\r\nContent-Type:application/octet-stream\r\nContent-Length: {len(content)}\r\n\r\n"
