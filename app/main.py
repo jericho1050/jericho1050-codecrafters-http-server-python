@@ -11,15 +11,16 @@ def main():
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     client_socket, client_address = server_socket.accept()  # wait for client
     request = client_socket.recv(1024).decode("utf-8")
-    headers, body = request.split("\r\n\r\n", 1)
-    first_line, host, accept, user_agent = headers.split(
+    header, body = request.split("\r\n\r\n", 1)
+    print(header)
+    first_line, *headers = header.split(
         "\r\n"
-    )  # which is the first line of the request in the headers
+    )  # which is the first line of the request in the headers (request line)
 
     method, path, protocol = first_line.split(
         " "
     )  # split the first line into method, path and protocol
-    user_agent = user_agent.split(": ")[1]
+    user_agent = headers[1].split(": ")[1]
 
     is_echo_route = re.match(r"/echo/(.*+)", path)
     is_user_agent_route = re.match(r"/user-agent", path)
