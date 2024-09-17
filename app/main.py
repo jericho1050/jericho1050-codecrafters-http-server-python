@@ -1,6 +1,7 @@
 import socket  # noqa: F401
 import re
 import threading
+import os
 
 
 def main():
@@ -54,15 +55,16 @@ def handle_client(client_socket):
         elif is_file_route:
             directory_path = is_file_route.group(1)
             file_path = is_file_route.group(2)
+
             try:
-
-                with open(f"/{directory_path}/{file_path}", "r") as file:
+                with open(os.path.join(directory_path, file_path), "rb") as file:
                     content = file.read()  # read the content of the file
-                    response = f"HTTP/1.1 200 OK\r\nContent-Type:text/plain\r\nContent-Length: {len(content)}\r\n\r\n{content}\r\n"
-            except FileNotFoundError:
-                response = "HTTP/1.1 404 Not Found\r\n\r\n"
+                    headers = f"HTTP/1.1 200 OK\r\nContent-Type:application/octet-stream\r\nContent-Length: {len(content)}\r\n\r\n"
+                    response = headers.encode("utf-8") + content + b"\r\n"
+            except (FileNotFoundError, IsADirectoryError):
+                response = b"HTTP/1.1 404 Not Found\r\n\r\n"
 
-            client_socket.sendall(response.encode("utf-8"))
+            client_socket.sendall(response)
 
         else:
             response = "HTTP/1.1 404 Not Found\r\n\r\n"
