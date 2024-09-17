@@ -33,8 +33,9 @@ def handle_client(client_socket):
                 user_agent = header_line.split(": ")[1]
                 break
 
-        is_echo_route = re.match(r"/echo/(.*+)", path)
+        is_echo_route = re.match(r"/echo/(.*)", path)
         is_user_agent_route = re.match(r"/user-agent", path)
+        is_file_route = re.match(r"/files/(.*)", path)
         if path == "/":
             response = "HTTP/1.1 200 OK\r\n\r\n"
             client_socket.sendall(response.encode("utf-8"))
@@ -48,6 +49,17 @@ def handle_client(client_socket):
         elif is_user_agent_route:
 
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}\r\n"
+
+            client_socket.sendall(response.encode("utf-8"))
+        elif is_file_route:
+            file_path = is_file_route.group(1)
+            try:
+
+                with open("/tmp/" + file_path, "r") as file:
+                    content = file.read()  # read the content of the file
+                    response = f"HTTP/1.1 200 OK\r\nContent-Type:text/plain\r\nContent-Length: {len(content)}\r\n\r\n{content}\r\n"
+            except FileNotFoundError:
+                response = "HTTP/1.1 404 Not Found\r\n\r\n"
 
             client_socket.sendall(response.encode("utf-8"))
 
