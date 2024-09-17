@@ -1,5 +1,6 @@
 import socket  # noqa: F401
 import re
+import threading
 
 
 def main():
@@ -9,44 +10,52 @@ def main():
     # Uncomment this to pass the first stage
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
-    client_socket, client_address = server_socket.accept()  # wait for client
-    request = client_socket.recv(1024).decode("utf-8")
-    header, body = request.split("\r\n\r\n", 1)
-    first_line, *headers = header.split(
-        "\r\n"
-    )  # which is the first line of the request in the headers (request line)
+    while True:
+        threading.Thread(target=handle_client, args=(client_socket,)).start()
+        client_socket, client_address = server_socket.accept()
 
-    method, path, protocol = first_line.split(
-        " "
-    )  # split the first line into method, path and protocol
 
-    user_agent = None
-    for header_line in headers:
-        if header_line.startswith("User-Agent:"):
-            user_agent = header_line.split(": ")[1]
-            break
+def handle_client(client_socket):
+    try:
+        request = client_socket.recv(1024).decode("utf-8")
+        header, body = request.split("\r\n\r\n", 1)
+        first_line, *headers = header.split(
+            "\r\n"
+        )  # which is the first line of the request in the headers (request line)
 
-    is_echo_route = re.match(r"/echo/(.*+)", path)
-    is_user_agent_route = re.match(r"/user-agent", path)
-    if path == "/":
-        response = "HTTP/1.1 200 OK\r\n\r\n"
-        client_socket.sendall(response.encode("utf-8"))
-    elif is_echo_route:
-        response = (
-            f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(is_echo_route.group(1))}\r\n\r\n"
-            + is_echo_route.group(1)
-            + "\r\n"
-        )
-        client_socket.sendall(response.encode("utf-8"))
-    elif is_user_agent_route:
+        method, path, protocol = first_line.split(
+            " "
+        )  # split the first line into method, path and protocol
 
-        response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}\r\n"
+        user_agent = None
+        for header_line in headers:
+            if header_line.startswith("User-Agent:"):
+                user_agent = header_line.split(": ")[1]
+                break
 
-        client_socket.sendall(response.encode("utf-8"))
+        is_echo_route = re.match(r"/echo/(.*+)", path)
+        is_user_agent_route = re.match(r"/user-agent", path)
+        if path == "/":
+            response = "HTTP/1.1 200 OK\r\n\r\n"
+            client_socket.sendall(response.encode("utf-8"))
+        elif is_echo_route:
+            response = (
+                f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(is_echo_route.group(1))}\r\n\r\n"
+                + is_echo_route.group(1)
+                + "\r\n"
+            )
+            client_socket.sendall(response.encode("utf-8"))
+        elif is_user_agent_route:
 
-    else:
-        response = "HTTP/1.1 404 Not Found\r\n\r\n"
-        client_socket.sendall(response.encode("utf-8"))
+            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}\r\n"
+
+            client_socket.sendall(response.encode("utf-8"))
+
+        else:
+            response = "HTTP/1.1 404 Not Found\r\n\r\n"
+            client_socket.sendall(response.encode("utf-8"))
+    finally:
+        client_socket.close()
 
 
 if __name__ == "__main__":
