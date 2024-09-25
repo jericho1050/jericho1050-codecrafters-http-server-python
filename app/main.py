@@ -36,7 +36,7 @@ def handle_client(client_socket):
                 user_agent = header_line.split(": ")[1]
                 break
             if header_line.startswith("Accept-Encoding:"):
-                content_encoding = header_line.split(": ")[1] if "gzip" in header_line.split(": ")[1] else None
+                content_encoding = header_line.index("gzip") if "gzip" in header_line.split(": ")[1] else None
 
         # check if the path is one of the routes
         is_echo_route = re.match(r"/echo/(.*)", path)
