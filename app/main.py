@@ -30,20 +30,25 @@ def handle_client(client_socket):
         )  # split the first line into method, path and protocol
 
         user_agent = None
+        content_encoding = None
         for header_line in headers:
             if header_line.startswith("User-Agent:"):
                 user_agent = header_line.split(": ")[1]
                 break
+            if header_line.startswith("Accept-Encoding:"):
+                content_encoding = header_line.split(": ")[1] if "gzip" in header_line.split(": ")[1] else None
 
+        # check if the path is one of the routes
         is_echo_route = re.match(r"/echo/(.*)", path)
         is_user_agent_route = re.match(r"/user-agent", path)
         is_file_route = re.match(r"/files/(.*)", path)
+        
         if path == "/":
             response = "HTTP/1.1 200 OK\r\n\r\n"
             client_socket.sendall(response.encode("utf-8"))
         elif is_echo_route:
             response = (
-                f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(is_echo_route.group(1))}\r\n\r\n"
+                f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(is_echo_route.group(1))}{"\r\nContent-Encoding: " + content_encoding if content_encoding else ""}\r\n\r\n"
                 + is_echo_route.group(1)
                 + "\r\n"
             )
