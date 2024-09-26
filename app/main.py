@@ -54,7 +54,7 @@ def handle_client(client_socket):
                 content_encoding_header = f"Content-Encoding: {content_encoding}\r\n"
             else:
                 body = is_echo_route.group(1).encode("utf-8")
-                content_encoding_header = f""
+                content_encoding_header = ""
             response_headers = f"HTTP/1.1 200 OK\r\n{content_encoding_header}Content-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n".encode("utf-8")   
             
             response = response_headers + body
