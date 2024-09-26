@@ -3,7 +3,7 @@ import re
 import threading
 import os
 import sys
-
+import gzip
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -48,12 +48,17 @@ def handle_client(client_socket):
             response = "HTTP/1.1 200 OK\r\n\r\n"
             client_socket.sendall(response.encode("utf-8"))
         elif is_echo_route:
-            response = (
-                f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(is_echo_route.group(1))}{"\r\nContent-Encoding: " + content_encoding if content_encoding else ""}\r\n\r\n"
-                + is_echo_route.group(1)
-                + "\r\n"
-            )
-            client_socket.sendall(response.encode("utf-8"))
+            # if the path is the echo route, return the content of the path
+            if content_encoding:
+                body = gzip.compress(is_echo_route.group(1).encode('utf-8'))
+                content_encoding_header = f"Content-Encoding: {content_encoding}\r\n"
+            else:
+                body = is_echo_route.group(1).encode("utf-8")
+                content_encoding_header = f""
+            response_headers = f"HTTP/1.1 200 OK\r\n{content_encoding_header}Content-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n".encode("utf-8")   
+            
+            response = response_headers + body
+            client_socket.sendall(response)
         elif is_user_agent_route:
 
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}\r\n"
